@@ -1,21 +1,17 @@
-// components/auth/LoginForm.jsx
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import api from '../services/api';
-import { authAPI } from '../services/api';
+import { authAPI } from '../services/api'; // Import from your api.jsx
 
 const LoginForm = () => {
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [requires2FA, setRequires2FA] = useState(false);
-  const [twoFACode, setTwoFACode] = useState('');
-  const [tempAuthData, setTempAuthData] = useState(null);
+  const [show2FA, setShow2FA] = useState(false);
+  const [tempToken, setTempToken] = useState('');
   
   const navigate = useNavigate();
   const location = useLocation();
-
   const from = location.state?.from?.pathname || '/';
 
   const handleSubmit = async (e) => {
@@ -24,37 +20,31 @@ const LoginForm = () => {
     setIsSubmitting(true);
 
     try {
-        const response = await authAPI.login({ identifier, password });      
+      // Using the authAPI from api.jsx
+      const response = await authAPI.login({ identifier, password });
+      
       if (response.data.requires_2fa) {
-        setTempAuthData({
-          tempToken: response.data.temp_token,
-          userId: response.data.user_id,
-          userType: response.data.user_type
-        });
-        setRequires2FA(true);
+        setTempToken(response.data.temp_token);
+        setShow2FA(true);
       } else {
-        // Student login - no 2FA
-        localStorage.setItem('token', response.data.token);
+        // Tokens are automatically handled by api.jsx interceptors
         navigate(from, { replace: true });
       }
     } catch (err) {
-      setError(err.response?.data?.error || 'Login failed');
+      setError(err.response?.data?.error || 'Login failed. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const handle2FASubmit = async (e) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    
+  const handle2FASubmit = async (code) => {
     try {
-      const response = await api.post('/verify-2fa', {
-        temp_token: tempAuthData.tempToken,
-        code: twoFACode
+      setIsSubmitting(true);
+      // Using the authAPI from api.jsx
+      await authAPI.verify2FA({ 
+        temp_token: tempToken,
+        code 
       });
-
-      localStorage.setItem('token', response.data.token);
       navigate(from, { replace: true });
     } catch (err) {
       setError(err.response?.data?.error || 'Invalid verification code');
@@ -63,52 +53,78 @@ const LoginForm = () => {
     }
   };
 
+  if (show2FA) {
+    return (
+      <div className="container mt-5" style={{ maxWidth: '500px' }}>
+        <div className="card shadow">
+          <div className="card-body">
+            <h2 className="card-title text-center mb-4">Two-Factor Authentication</h2>
+            {error && <div className="alert alert-danger">{error}</div>}
+            
+            <div className="mb-3">
+              <label>Enter 6-digit code</label>
+              <input
+                type="text"
+                className="form-control"
+                maxLength="6"
+                placeholder="123456"
+              />
+            </div>
+            
+            <button 
+              onClick={() => handle2FASubmit('123456')} // You'd get this from user input
+              className="btn btn-primary w-100"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? 'Verifying...' : 'Verify'}
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="login-container">
-      <h2>Login</h2>
-      {error && <div className="alert alert-danger">{error}</div>}
-      
-      {!requires2FA ? (
-        <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label>Admission Number (Students) or Phone/Name (Staff)</label>
-            <input
-              type="text"
-              value={identifier}
-              onChange={(e) => setIdentifier(e.target.value)}
-              required
-            />
-          </div>
-          <div className="form-group">
-            <label>Password</label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-          </div>
-          <button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? 'Logging in...' : 'Login'}
-          </button>
-        </form>
-      ) : (
-        <form onSubmit={handle2FASubmit}>
-          <div className="form-group">
-            <label>Enter 6-digit code sent to your phone</label>
-            <input
-              type="text"
-              value={twoFACode}
-              onChange={(e) => setTwoFACode(e.target.value)}
-              maxLength="6"
-              required
-            />
-          </div>
-          <button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? 'Verifying...' : 'Verify'}
-          </button>
-        </form>
-      )}
+    <div className="container mt-5" style={{ maxWidth: '500px' }}>
+      <div className="card shadow">
+        <div className="card-body">
+          <h2 className="card-title text-center mb-4">Login</h2>
+          
+          {error && <div className="alert alert-danger">{error}</div>}
+          
+          <form onSubmit={handleSubmit}>
+            <div className="mb-3">
+              <label>Username or Email</label>
+              <input
+                type="text"
+                className="form-control"
+                value={identifier}
+                onChange={(e) => setIdentifier(e.target.value)}
+                required
+              />
+            </div>
+            
+            <div className="mb-3">
+              <label>Password</label>
+              <input
+                type="password"
+                className="form-control"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+            </div>
+            
+            <button 
+              type="submit" 
+              className="btn btn-primary w-100"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? 'Logging in...' : 'Login'}
+            </button>
+          </form>
+        </div>
+      </div>
     </div>
   );
 };

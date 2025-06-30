@@ -1,15 +1,20 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from './AuthProvider';
+import LoadingSpinner from '../components/common/LoadingSpinner';
 
-const RoleBasedRoute = ({ role, children }) => {
-  const { role: userRole } = useAuth();
+const RoleBasedRoute = ({ allowedRoles, children }) => {
+  const { user, loading } = useAuth();
 
-  if (userRole === null) {
-    return null; // Prevent redirecting before role is set
+  if (loading) {
+    return <LoadingSpinner fullPage />;
   }
 
-  return userRole === role ? children : <Navigate to="/" replace />;
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+
+  return allowedRoles.includes(user.role) ? children : <Navigate to="/" replace />;
 };
 
 export default RoleBasedRoute;

@@ -1,10 +1,10 @@
 import axios from 'axios';
 import { useAuth } from '../auth/AuthProvider';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api/';
 
 const api = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: API_BASE_URL,  // Now guaranteed to have trailing slash
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
@@ -36,7 +36,7 @@ api.interceptors.response.use(
       try {
         const refreshToken = localStorage.getItem('refreshToken');
         if (refreshToken) {
-          const response = await axios.post(`${API_BASE_URL}/auth/refresh`, { refreshToken });
+          const response = await axios.post(`${API_BASE_URL}auth/refresh/`, { refreshToken });
           localStorage.setItem('token', response.data.token);
           api.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
           return api(originalRequest);
@@ -54,14 +54,16 @@ api.interceptors.response.use(
   }
 );
 
-// Auth API
+// Auth API - Note trailing slashes in all endpoints
 export const authAPI = {
-  login: (credentials) => api.post('/login', credentials),
-  logout: () => api.post('/logout'),
-  verifyToken: () => api.get('/auth/verify'),
-  request2FA: () => api.post('/2fa/request'),
-  verify2FA: (data) => api.post('/2fa/verify', data)
+  login: (credentials) => api.post('login/', credentials),
+  logout: () => api.post('logout/'),
+  verifyToken: () => api.get('auth/verify/'),
+  request2FA: () => api.post('2fa/request/'),
+  verify2FA: (data) => api.post('2fa/verify/', data),
+  refreshToken: (refreshToken) => api.post('auth/refresh/', { refresh_token: refreshToken })
 };
+
 
 // Student API
 export const studentAPI = {

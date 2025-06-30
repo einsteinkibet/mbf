@@ -1,6 +1,6 @@
 import React from 'react';
 
-const VisionMission = () => {
+const StudyCorner = () => {
   return (
     <section className="container mt-5">
       <div className="row">
@@ -27,4 +27,4 @@ const VisionMission = () => {
   );
 };
 
-export default VisionMission;
+export default StudyCorner;

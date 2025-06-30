@@ -3,50 +3,52 @@ import axios from 'axios';
 import './adminstyles/addStudent.css';
 import { gradeAPI, busAPI, studentAPI, classAPI } from '../../services/api';
 
-// Fetch grades:
-const gradeResponse = await gradeAPI.getAll();
-
-// Fetch destinations:
-const destinationResponse = await busAPI.getDestinations();
-
-// Handle submit:
-const response = await studentAPI.create(studentData);
 const AddStudent = () => {
-  const [name, setName] = useState('');
-  const [phone, setPhone] = useState('');
-  const [admission_number, setAdmission_number] = useState('');
-  const [grade, setGrade] = useState('');
-  const [use_bus, setUse_bus] = useState(false);
-  const [class_id, setClass_id] = useState('');
-  const [classes, setClasses] = useState([]);
+  const [formData, setFormData] = useState({
+    name: '',
+    phone: '',
+    admission_number: '',
+    grade: '',
+    class_id: '',
+    use_bus: false,
+    destination_id: '',
+    is_boarding: false
+  });
 
-  const [destination_id, setDestination_id] = useState('');
-  const [is_boarding, setIs_boarding] = useState(false);
+  const [classes, setClasses] = useState([]);
   const [grades, setGrades] = useState([]);
   const [busDestinations, setBusDestinations] = useState([]);
   const [message, setMessage] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchInitialData = async () => {
       try {
-        const gradeResponse = await gradeAPI.getAll();
-        setGrades(gradeResponse.data);
-
-        const destinationResponse = await busAPI.getDestinations();
-        setBusDestinations(destinationResponse.data);
+        setIsLoading(true);
+        const [gradesRes, destinationsRes] = await Promise.all([
+          gradeAPI.getAll(),
+          busAPI.getDestinations()
+        ]);
+        setGrades(gradesRes.data);
+        setBusDestinations(destinationsRes.data);
       } catch (error) {
         console.error('Error fetching data:', error);
-        setMessage('Failed to load grades or destinations.');
+        setMessage('Failed to load initial data');
+      } finally {
+        setIsLoading(false);
       }
     };
 
-    fetchData();
+    fetchInitialData();
   }, []);
 
   const handleGradeChange = async (e) => {
-    const selectedGrade = parseInt(e.target.value);
-    setGrade(selectedGrade);
-    setClass_id('');
+    const selectedGrade = e.target.value;
+    setFormData({
+      ...formData,
+      grade: selectedGrade,
+      class_id: ''
+    });
 
     try {
       const res = await gradeAPI.getClasses(selectedGrade);
@@ -54,45 +56,60 @@ const AddStudent = () => {
     } catch (error) {
       console.error('Error fetching classes:', error);
       setClasses([]);
+      setMessage('Failed to load classes for this grade');
     }
+  };
+
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setFormData({
+      ...formData,
+      [name]: type === 'checkbox' ? checked : value
+    });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
-    if (!grade || !class_id) {
-      setMessage('Please select both grade and class.');
+    
+    if (!formData.grade || !formData.class_id) {
+      setMessage('Please select both grade and class');
       return;
     }
-  
-    const studentData = {
-      name,
-      phone,
-      admission_number,
-      grade_id: parseInt(grade),
-      class_id: parseInt(class_id),
-      is_boarding,
-      use_bus,
-      destination_id: use_bus ? parseInt(destination_id) : null,
-    };
-  
+
     try {
-      const response = await studentAPI.create(studentData);
-      setMessage(response.data.message || 'Student added successfully.');
+      setIsLoading(true);
+      const response = await studentAPI.create({
+        name: formData.name,
+        phone: formData.phone,
+        admission_number: formData.admission_number,
+        grade_id: parseInt(formData.grade),
+        class_id: parseInt(formData.class_id),
+        is_boarding: formData.is_boarding,
+        use_bus: formData.use_bus,
+        destination_id: formData.use_bus ? parseInt(formData.destination_id) : null
+      });
+
+      setMessage(response.data.message || 'Student added successfully');
       // Reset form
-      setName('');
-      setAdmission_number('');
-      setGrade('');
-      setPhone('');
-      setUse_bus(false);
-      setClass_id('');
-      setDestination_id('');
-      setIs_boarding(false);
+      setFormData({
+        name: '',
+        phone: '',
+        admission_number: '',
+        grade: '',
+        class_id: '',
+        use_bus: false,
+        destination_id: '',
+        is_boarding: false
+      });
+      setClasses([]);
     } catch (error) {
       console.error('Error adding student:', error);
       setMessage(error.response?.data?.error || 'Error adding student. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
   };
+
   return (
     <div className="add-student-container">
       <div className="form-card">
@@ -113,7 +130,14 @@ const AddStudent = () => {
                 Name:
                 <span className="required">*</span>
               </label>
-              <input type="text" value={name} onChange={(e) => setName(e.target.value)} className="form-input" required />
+              <input
+                type="text"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                className="form-input"
+                required
+              />
             </div>
 
             <div className="form-group">
@@ -121,7 +145,14 @@ const AddStudent = () => {
                 Phone number:
                 <span className="required">*</span>
               </label>
-              <input type="text" value={phone} onChange={(e) => setPhone(e.target.value)} className="form-input" required />
+              <input
+                type="text"
+                name="phone"
+                value={formData.phone}
+                onChange={handleChange}
+                className="form-input"
+                required
+              />
             </div>
 
             <div className="form-group">
@@ -129,7 +160,14 @@ const AddStudent = () => {
                 Admission Number:
                 <span className="required">*</span>
               </label>
-              <input type="text" value={admission_number} onChange={(e) => setAdmission_number(e.target.value)} className="form-input" required />
+              <input
+                type="text"
+                name="admission_number"
+                value={formData.admission_number}
+                onChange={handleChange}
+                className="form-input"
+                required
+              />
             </div>
 
             <div className="form-group">
@@ -137,33 +175,41 @@ const AddStudent = () => {
                 Grade:
                 <span className="required">*</span>
               </label>
-              <select value={grade} onChange={handleGradeChange} className="form-select" required>
+              <select
+                name="grade"
+                value={formData.grade}
+                onChange={handleGradeChange}
+                className="form-select"
+                required
+                disabled={isLoading}
+              >
                 <option value="">Select Grade</option>
-                {grades.length > 0 ? (
-                  grades.map((g) => (
-                    <option key={g.id} value={g.id}>
-                      {g.grade}
-                    </option>
-                  ))
-                ) : (
-                  <option value="">Loading Grades...</option>
-                )}
+                {grades.map((g) => (
+                  <option key={g.id} value={g.id}>
+                    {g.name}
+                  </option>
+                ))}
               </select>
             </div>
 
-            {grade && (
+            {formData.grade && (
               <div className="form-group">
-                <label className="form-label">Class:</label>
+                <label className="form-label">
+                  Class:
+                  <span className="required">*</span>
+                </label>
                 <select
-                  value={class_id}
-                  onChange={(e) => setClass_id(parseInt(e.target.value))} // ✅ parse to int
+                  name="class_id"
+                  value={formData.class_id}
+                  onChange={handleChange}
                   className="form-select"
                   required
+                  disabled={isLoading}
                 >
                   <option value="">Select Class</option>
                   {classes.map((c) => (
                     <option key={c.id} value={c.id}>
-                      {c.name} ({c.staff_name})
+                      {c.name} ({c.staff_name || 'No teacher'})
                     </option>
                   ))}
                 </select>
@@ -172,29 +218,43 @@ const AddStudent = () => {
 
             <div className="form-group checkbox-group">
               <label className="checkbox-label">
-                <input type="checkbox" checked={is_boarding} onChange={(e) => setIs_boarding(e.target.checked)} className="checkbox-input" />
+                <input
+                  type="checkbox"
+                  name="is_boarding"
+                  checked={formData.is_boarding}
+                  onChange={handleChange}
+                  className="checkbox-input"
+                />
                 <span className="checkbox-custom"></span> Is Boarding
               </label>
             </div>
 
             <div className="form-group checkbox-group">
               <label className="checkbox-label">
-                <input type="checkbox" checked={use_bus} onChange={(e) => setUse_bus(e.target.checked)} className="checkbox-input" />
+                <input
+                  type="checkbox"
+                  name="use_bus"
+                  checked={formData.use_bus}
+                  onChange={handleChange}
+                  className="checkbox-input"
+                />
                 <span className="checkbox-custom"></span> Will Use Bus
               </label>
             </div>
 
-            {use_bus && (
+            {formData.use_bus && (
               <div className="form-group">
                 <label className="form-label">
                   Bus Destination:
                   <span className="required">*</span>
                 </label>
                 <select
-                  value={destination_id}
-                  onChange={(e) => setDestination_id(parseInt(e.target.value))} // ✅ parse to int
+                  name="destination_id"
+                  value={formData.destination_id}
+                  onChange={handleChange}
                   className="form-select"
                   required
+                  disabled={isLoading}
                 >
                   <option value="">Select Destination</option>
                   {busDestinations.map((d) => (
@@ -207,7 +267,13 @@ const AddStudent = () => {
             )}
           </div>
 
-          <button type="submit" className="submit-button">Add Student</button>
+          <button
+            type="submit"
+            className="submit-button"
+            disabled={isLoading}
+          >
+            {isLoading ? 'Adding...' : 'Add Student'}
+          </button>
         </form>
       </div>
     </div>

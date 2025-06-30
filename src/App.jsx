@@ -42,7 +42,7 @@ const App = () => {
           <Route path="/student-details" element={<PrivateRoute><RoleBasedRoute role="admin"><StudentDetails /></RoleBasedRoute></PrivateRoute>} />
           <Route path="/staff" element={<PrivateRoute><RoleBasedRoute role="admin"><StaffList /></RoleBasedRoute></PrivateRoute>} />
 
-
+          {/* Fallback routes */}
           <Route path="*" element={<Navigate to="/" />} />
 
         </Routes>

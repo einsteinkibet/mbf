@@ -1,0 +1,41 @@
+.term-management-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.term-actions {
+  margin-bottom: 20px;
+  display: flex;
+  gap: 10px;
+}
+
+.term-card, .fee-card {
+  margin-bottom: 24px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.ant-table {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.active-term {
+  color: #52c41a;
+  font-weight: 500;
+}
+
+.inactive-term {
+  color: #8c8c8c;
+}
+
+.fee-amount {
+  font-weight: 500;
+  color: #1890ff;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 8px;
+}

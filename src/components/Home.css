@@ -1,0 +1,93 @@
+/* Home.css */
+
+/* General Page Styling */
+.home-container {
+  font-family: 'Poppins', sans-serif;
+  background: linear-gradient(to bottom, #f0f4ff, #ffffff);
+  color: #333;
+}
+
+/* Carousel Styling */
+.carousel-inner img {
+  height: 70vh;
+  object-fit: cover;
+  border-radius: 10px;
+  box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.2);
+  transition: transform 0.5s ease-in-out;
+}
+
+.carousel-item.active img {
+  transform: scale(1.03);
+}
+
+.carousel-caption {
+  background: rgba(0, 0, 0, 0.6);
+  padding: 15px;
+  border-radius: 8px;
+  backdrop-filter: blur(5px);
+}
+
+.legendary-text {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #fff;
+  animation: fadeInUp 1s ease-in-out;
+}
+
+/* Carousel Controls */
+.carousel-control-prev-icon, .carousel-control-next-icon {
+  background-color: rgba(0, 0, 0, 0.5);
+  border-radius: 50%;
+  padding: 15px;
+}
+
+.carousel-control-prev:hover, .carousel-control-next:hover {
+  transform: scale(1.1);
+}
+
+/* Fade-in Animation */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Vision & Mission Styling */
+.vision-mission-container {
+  text-align: center;
+  padding: 50px 20px;
+}
+
+.vision-mission-text {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #222;
+  animation: easeInEffect 1.2s ease-in-out;
+}
+
+/* Smooth Entrance Animation */
+@keyframes easeInEffect {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Footer Styling */
+.footer {
+  background: #222;
+  color: white;
+  text-align: center;
+  padding: 20px;
+  margin-top: 50px;
+  font-size: 0.9rem;
+}

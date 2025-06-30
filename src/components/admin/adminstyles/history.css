@@ -1,0 +1,115 @@
+.performance-history {
+  padding: 20px;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-top: 20px;
+}
+
+.tab-content {
+  padding: 20px 0;
+}
+
+.loading-container {
+  display: flex;
+  justify-content: center;
+  padding: 40px;
+  color: #7f8c8d;
+}
+
+.error-message {
+  color: #e74c3c;
+  padding: 10px;
+  background-color: #fadbd8;
+  border-radius: 4px;
+  text-align: center;
+}
+
+.no-data {
+  text-align: center;
+  padding: 40px;
+  color: #7f8c8d;
+  font-size: 18px;
+}
+
+.exam-performance h3,
+.subject-performance h3,
+.performance-trends h3 {
+  color: #2c3e50;
+  margin-bottom: 20px;
+  font-size: 20px;
+}
+
+.exam-chart-container,
+.subject-chart-container {
+  margin-bottom: 40px;
+  padding: 20px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+}
+
+.exam-chart-container h4,
+.subject-chart-container h4 {
+  color: #34495e;
+  margin-bottom: 15px;
+  font-size: 18px;
+}
+
+.chart-wrapper {
+  margin-bottom: 20px;
+  height: 300px;
+}
+
+.exam-marks-table,
+.subject-marks-table {
+  overflow-x: auto;
+}
+
+.exam-marks-table table,
+.subject-marks-table table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+.exam-marks-table th,
+.subject-marks-table th {
+  background-color: #3498db;
+  color: white;
+  padding: 12px 15px;
+  text-align: left;
+}
+
+.exam-marks-table td,
+.subject-marks-table td {
+  padding: 12px 15px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.exam-marks-table tr:hover,
+.subject-marks-table tr:hover {
+  background-color: #f5f9fc;
+}
+
+.grade-A { color: #27ae60; font-weight: 600; }
+.grade-B { color: #f39c12; font-weight: 600; }
+.grade-C { color: #e67e22; font-weight: 600; }
+.grade-D { color: #d35400; font-weight: 600; }
+.grade-F { color: #c0392b; font-weight: 600; }
+
+.performance-trends {
+  padding: 20px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+}
+
+@media (max-width: 768px) {
+  .chart-wrapper {
+    height: 250px;
+  }
+  
+  .exam-chart-container,
+  .subject-chart-container {
+    padding: 15px;
+  }
+}
